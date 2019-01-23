@@ -1,0 +1,14 @@
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+
+  &__authbox {
+    width: 400px;
+  }
+
+  &__dropbox {
+    width: 100%;
+  }
+}
