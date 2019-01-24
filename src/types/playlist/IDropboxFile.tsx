@@ -1,4 +1,4 @@
-export interface IFile {
+export interface IDropboxFile {
   client_modified: "2019-01-21T07:25:43Z";
   content_hash: "47c7b0b8e554709bf6cb1d40ee02ce20a4dcd0ba830ed2aa6363a9007cd4e8eb";
   id: "id:aHP7_jX3IqQAAAAAAAABNw";
@@ -8,4 +8,5 @@ export interface IFile {
   rev: "76dc2d6d4b02";
   server_modified: "2019-01-21T07:25:44Z";
   size: 11864326;
+  ".tag": string;
 }

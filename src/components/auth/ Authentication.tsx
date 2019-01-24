@@ -19,6 +19,8 @@ class Authentication extends React.Component<IAuthentication> {
     if (url) {
       this.setState({ OAuthUrl: url });
     }
+    console.log("Квери стринг", queryString.parse(this.props.location.hash));
+
     if (this.props.location.hash) {
       const urlParams = queryString.parse(this.props.location.hash) as any;
       this.props.onSuccess(
@@ -30,6 +32,16 @@ class Authentication extends React.Component<IAuthentication> {
     }
   }
 
+  handleOnedriveAuth = () => {
+    localStorage.setItem("cloudSource", "OneDrive");
+    const userAgentApplication = new Msal.UserAgentApplication(
+      "b07f11e5-8934-40a1-a327-1859322ed1c6",
+      null,
+      () => {}
+    );
+    userAgentApplication.loginRedirect();
+  };
+
   public render() {
     return (
       <div className="auth-container">
@@ -40,6 +52,9 @@ class Authentication extends React.Component<IAuthentication> {
           </p>
           <Button
             className="auth-container__button"
+            onClick={() => {
+              localStorage.setItem("cloudSource", "Dropbox");
+            }}
             type="primary"
             href={this.state.OAuthUrl}
           >
@@ -49,17 +64,7 @@ class Authentication extends React.Component<IAuthentication> {
           <Button
             className="auth-container__button"
             type="primary"
-            onClick={() => {
-              var userAgentApplication = new Msal.UserAgentApplication(
-                "b07f11e5-8934-40a1-a327-1859322ed1c6",
-                null,
-                // "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-                result => {
-                  console.log(result);
-                }
-              );
-              userAgentApplication.loginRedirect();
-            }}
+            onClick={this.handleOnedriveAuth}
           >
             <Icon type="windows" />
             Войти через OneDrive

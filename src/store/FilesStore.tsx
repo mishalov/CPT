@@ -1,8 +1,8 @@
 import { observable } from "mobx";
-import { IFile } from "../types/playlist/IFile";
+import { FileSet } from "../types/playlist/FileSet";
 
 class FilesStore {
-  @observable files: IFile[] = [];
+  @observable files!: FileSet;
 }
 
 export default new FilesStore();

@@ -884,6 +884,11 @@
     es6-promise "^4.1.0"
     isomorphic-fetch "^2.2.1"
 
+"@microsoft/microsoft-graph-types@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/microsoft-graph-types/-/microsoft-graph-types-1.5.0.tgz#43f63ad217e871c418e8342bae2eff300b07f023"
+  integrity sha512-eit9LMlhHLyzCByATGL8d7izWNRVBlzrPMfXqy2a9qIVUUNIGxyqkGJNrpEh3EVDXW2r+/ASsBAqzHkm8zWJiQ==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"

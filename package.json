@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@microsoft/microsoft-graph-client": "^1.4.0",
+    "@microsoft/microsoft-graph-types": "^1.5.0",
     "@types/antd": "^1.0.0",
     "@types/isomorphic-fetch": "^0.0.34",
     "@types/jest": "^23.3.13",

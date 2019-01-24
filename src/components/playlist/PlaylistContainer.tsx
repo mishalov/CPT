@@ -2,11 +2,12 @@ import React from "react";
 import { List, Icon, Row, Col } from "antd";
 import "./Playlist.scss";
 import { Dropbox } from "dropbox";
-import { IFile } from "../../types/playlist/IFile";
+import { File } from "../../types/playlist/File";
 import { IPlaylistItem } from "../../types/playlist/IPlaylistItem";
+import { IDropboxFile } from "../../types/playlist/IDropboxFile";
 
 interface IPlayListContainer {
-  files: IFile[];
+  files: IDropboxFile[];
 }
 
 class PlaylistContainer extends React.Component<IPlayListContainer> {
@@ -14,7 +15,7 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
     playlist: []
   };
 
-  mapPlaylist = (files: IFile[]) => {
+  mapPlaylist = (files: IDropboxFile[]) => {
     const playlist: IPlaylistItem[] = files.map(el => ({
       title: el.name,
       bandName: "Альбомы пока не поддерживаются",
