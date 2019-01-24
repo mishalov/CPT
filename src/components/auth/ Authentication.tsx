@@ -3,6 +3,7 @@ import queryString from "query-string";
 import { Dropbox } from "dropbox";
 import { withRouter, RouteComponentProps } from "react-router";
 import { Card, Button, Icon } from "antd";
+import * as Msal from "msal";
 import "./Authentication.scss";
 
 interface IAuthentication extends RouteComponentProps {
@@ -38,12 +39,30 @@ class Authentication extends React.Component<IAuthentication> {
             авторизация. Нажмите пожалуйста на кнопку ниже.
           </p>
           <Button
-            className="auth-container__dropbox"
+            className="auth-container__button"
             type="primary"
             href={this.state.OAuthUrl}
           >
             <Icon type="dropbox" />
-            Войти
+            Войти через Dropbox
+          </Button>
+          <Button
+            className="auth-container__button"
+            type="primary"
+            onClick={() => {
+              var userAgentApplication = new Msal.UserAgentApplication(
+                "b07f11e5-8934-40a1-a327-1859322ed1c6",
+                null,
+                // "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+                result => {
+                  console.log(result);
+                }
+              );
+              userAgentApplication.loginRedirect();
+            }}
+          >
+            <Icon type="windows" />
+            Войти через OneDrive
           </Button>
         </Card>
       </div>

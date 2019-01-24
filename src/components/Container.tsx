@@ -23,7 +23,7 @@ class Container extends React.Component<RouteComponentProps> {
   state = {
     OAuthVisible: true,
     OAuthUrl: "",
-    OAuthPassed: true,
+    OAuthPassed: false,
     authData: {
       access_token: "",
       account_id: "",
@@ -33,8 +33,7 @@ class Container extends React.Component<RouteComponentProps> {
     files: [],
     dropBox: new Dropbox({
       clientId: "7174q8sh3aiss51",
-      accessToken:
-        "bpx4elW19lAAAAAAAAAAozHOrwXSgK3Gh50L0vj-rNEjHDilvWkLJeQuXd70d-Vx"
+      accessToken: ""
     })
   };
 
@@ -49,15 +48,14 @@ class Container extends React.Component<RouteComponentProps> {
     /*
     для тестов и отладки
     */
-    this.getPlayList();
+    //this.getPlayList();
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
-    // отключено для тестов
-    // const { state, props } = this;
-    // if (state.OAuthPassed && (!prevState.OAuthPassed || !prevState)) {
-    //   this.getPlayList();
-    // }
+    const { state, props } = this;
+    if (state.OAuthPassed && (!prevState.OAuthPassed || !prevState)) {
+      this.getPlayList();
+    }
   }
 
   getPlayList = async () => {
