@@ -1,15 +1,23 @@
-import { observable } from "mobx";
+import { observable, action } from "mobx";
 
-interface IAuthStore {
-  OAuthUrl: string;
-  OAuthToken: string;
-  OAuthPassed: boolean;
-}
+export class AuthStore {
+  @observable OAuthUrl: string = "";
+  @observable OAuthToken: string = "";
+  @observable OAuthPassed: boolean = false;
 
-class AuthStore implements IAuthStore {
-  @observable OAuthUrl = "";
-  @observable OAuthToken = "";
-  @observable OAuthPassed = false;
+  @observable loading = false;
+
+  @action.bound setIsAuthed = () => {
+    this.OAuthPassed = true;
+  };
+
+  @action.bound setNotAuthed = () => {
+    this.OAuthPassed = false;
+  };
+
+  @action.bound setLoading = (loading: boolean) => {
+    this.loading = loading;
+  };
 }
 
 export default new AuthStore();

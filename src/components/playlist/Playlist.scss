@@ -1,9 +1,10 @@
 .audio-item {
-  height: 64px;
+  height: 48px;
   padding: 8px 8px;
-  .ant-list-item-content-single {
-    display: flex;
-    align-items: center;
+  margin: 4px 0px;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
   }
   &__play {
     width: 30px;
@@ -11,6 +12,7 @@
     margin-right: 24px;
   }
   &__info {
+    align-items: flex-start;
   }
   &__title {
     font-weight: bold;
@@ -20,5 +22,17 @@
   &__bandName {
     opacity: 0.7;
     margin-bottom: 0px;
+  }
+}
+
+.folder-item {
+  .ant-collapse-content-box {
+    padding: 8px;
+  }
+  .ant-collapse-header {
+    display: flex;
+    padding: 0px;
+    justify-items: center;
+    height: 48px;
   }
 }

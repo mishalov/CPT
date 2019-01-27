@@ -80,16 +80,15 @@ export class DropboxClient implements ICloudClient {
     this.client = client;
   }
 
-  getAllFiles() {
-    // const files = ((await this.client.filesListFolder({
-    //   path: "",
-    //   recursive: true,
-    //   include_media_info: true
-    // })).entries as any) as IDropboxFile[];
-    // return files;
-    return new FileSet();
-    // this.setState({
-    //   files: dropBox.filter(el => el.path_lower.indexOf(".mp3") !== -1)
-    // });
-  }
+  getAllFiles = async () => {
+    const files = await this.client.filesListFolder({
+      recursive: true,
+      path: ""
+    });
+    if (!files) throw new Error("Не удалось получить список файлов!");
+    const normalized: FileSet = normalize(files.entries as IDropboxFile[]);
+    return normalized;
+  };
+
+  authorize = () => {};
 }
