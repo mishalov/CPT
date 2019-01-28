@@ -1,10 +1,11 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Icon, Slider, Button } from "antd";
 import "./Player.scss";
 import { observer, inject } from "mobx-react";
-import ReactPlayer from "react-player";
+import ReactPlayer, { ReactPlayerProps } from "react-player";
 import { Store } from "../../store/Store";
 import { secsToMins } from "../../helpers/secsToMins";
+import { SliderValue } from "antd/lib/slider";
 
 interface IPlayerContainer {
   store?: Store;
@@ -26,13 +27,21 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
       playedSeconds: 0,
       loaded: 0,
       loadedSeconds: 0
-    }
+    },
+    volume: 0.5,
+    playback: 0
+  };
+  private player!: ReactPlayer;
+
+  handleChangeVolume = (volume: SliderValue) => {
+    this.setState({ volume: Number(volume) / 100 });
   };
   public render() {
     const { FilesStore } = this.props.store!;
     return (
       <div className="player" style={{ marginBottom: "12px" }}>
         <ReactPlayer
+          ref={el => (this.player = el!)}
           style={{
             position: "absolute",
             zIndex: -5
@@ -48,6 +57,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           fileConfig={{ forceAudio: true }}
           url={FilesStore.playNow.URL}
           playing={FilesStore.isPlay}
+          volume={this.state.volume}
         />
 
         <Icon
@@ -85,10 +95,20 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           </div>
           <Slider
             className="slider-block__slider"
-            max={100}
-            value={this.state.progress.played * 100}
+            max={FilesStore.playNow.audio.duration}
+            tipFormatter={(val: number) => secsToMins(val)}
+            onChange={(el: SliderValue) => {
+              this.player.seekTo(Number(el));
+            }}
+            value={this.state.progress.playedSeconds}
           />
         </div>
+        <Slider
+          className="player__volume"
+          max={100}
+          value={this.state.volume * 100}
+          onChange={this.handleChangeVolume}
+        />
         <div className="player__additional">
           <Icon className="player-btn__repeat" type="swap" />
           <div className="player-btn__shufle" />

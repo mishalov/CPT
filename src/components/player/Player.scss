@@ -27,6 +27,7 @@
       opacity: 0.8;
     }
     &__repeat {
+      display: block;
       font-size: 20px;
       color: #08c;
       opacity: 0.8;
@@ -39,6 +40,10 @@
     }
     &__additional {
     }
+  }
+  &__volume {
+    width: 100px;
+    margin: 0px 8px;
   }
 }
 
