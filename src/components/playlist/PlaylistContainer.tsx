@@ -8,10 +8,12 @@ import { IDropboxFile } from "../../types/playlist/IDropboxFile";
 import { observer, inject } from "mobx-react";
 import { FileSet } from "../../types/playlist/FileSet";
 import { Audio } from "../../types/playlist/Audio";
+import { Z_BLOCK } from "zlib";
 
 interface IPlayListContainer {
   files: FileSet;
   fetchFiles: () => void;
+  playFile: (path: string) => void;
 }
 
 let pseudoUid = 0;
@@ -46,10 +48,6 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
   componentDidUpdate(prevProps: any, prevState: any) {
     const { files } = this.props;
     console.log("files: ", files);
-
-    // if (files.length !== prevProps.files.length) {
-    //   this.setState({ playlist: this.mapPlaylist(files) });
-    // }
   }
 
   makeList(fs: FileSet) {
@@ -60,27 +58,17 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
     if (f.type === "File") {
       const audio = f.content as Audio;
       return (
-        <Row
+        <div
           className="audio-item"
           key={key()}
-          type="flex"
-          justify="center"
-          align="middle"
+          onClick={() => this.props.playFile(audio.fullPath)}
         >
-          <Col xs={{ span: 3 }} md={{ span: 1 }}>
-            <Icon
-              type="play-circle"
-              className="audio-item__play"
-              style={{ fontSize: "32px", color: "#08c" }}
-            />
-          </Col>
-          <Col xs={{ span: 21 }} md={{ span: 23 }}>
-            <div className="audio-item__info">
-              <p className="audio-item__title">{audio.title}</p>
-              <p className="audio-item__bandName">{audio.author}</p>
-            </div>
-          </Col>
-        </Row>
+          <div className="audio-item__art" style={{ marginRight: "12px" }} />
+          <div className="audio-item__info">
+            <p className="audio-item__title">{audio.title}</p>
+            <p className="audio-item__bandName">{audio.author}</p>
+          </div>
+        </div>
       );
     } else {
       const folder = f.content as FileSet;
@@ -96,18 +84,10 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
             <Collapse>
               <Panel
                 header={
-                  <Row key={key()} type="flex" justify="center" align="middle">
-                    <Col xs={{ span: 3 }} md={{ span: 3 }}>
-                      <Icon
-                        type="folder"
-                        className="audio-item__play"
-                        style={{ fontSize: "32px", color: "#08c" }}
-                      />
-                    </Col>
-                    <Col xs={{ span: 21 }} md={{ span: 21 }}>
-                      {f.title}
-                    </Col>
-                  </Row>
+                  <div className="folder-item__header">
+                    <Icon className="folder-item__icon" type="folder" />
+                    <div className="folder-item__title">{f.title}</div>
+                  </div>
                 }
                 key="1"
               >
@@ -121,9 +101,8 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
   }
 
   public render() {
-    console.log(this.props);
     return this.props.files ? (
-      this.makeList(this.props.files)
+      <div className="playlist">{this.makeList(this.props.files)}</div>
     ) : (
       <List
         itemLayout="horizontal"

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 // import fetch from "isomorphic-fetch";
 import { Dropbox } from "dropbox";
 import {
@@ -10,13 +10,11 @@ import {
 } from "react-router-dom";
 import PlaylistContainer from "./playlist/PlaylistContainer";
 import Authentication from "./auth/ Authentication";
-import { IDropboxFile } from "../types/playlist/IDropboxFile";
-import { FileSet } from "../types/playlist/FileSet";
-import { File } from "../types/playlist/File";
-import { Audio } from "../types/playlist/Audio";
 import { inject, observer } from "mobx-react";
 import { Store } from "../store/Store";
 import { Spin } from "antd";
+import PlayerContainer from "./player/PlayerContainer";
+import { isMobile } from "react-device-detect";
 
 interface IContainer extends RouteComponentProps {
   store?: Store;
@@ -35,10 +33,20 @@ class Container extends React.Component<IContainer> {
     }
   }
 
+  fetchFiles = () => {
+    const { FilesStore } = this.props.store!;
+    FilesStore.fetchFiles();
+  };
+
+  playFile = (path: string) => {
+    const { FilesStore } = this.props.store!;
+    FilesStore.playFile(path);
+  };
+
   public render() {
     const { FilesStore, AuthStore } = this.props.store!;
     return (
-      <div className="App">
+      <div className={"main-container"}>
         <Switch>
           <Route path="/auth" exec={true}>
             <Authentication />
@@ -46,12 +54,17 @@ class Container extends React.Component<IContainer> {
 
           <Route path="/">
             {AuthStore.OAuthPassed ? (
-              <PlaylistContainer
-                files={FilesStore.files}
-                fetchFiles={() => {
-                  FilesStore.fetchFiles();
-                }}
-              />
+              <Fragment>
+                <PlayerContainer />
+
+                <div style={{ marginTop: "12px" }}>
+                  <PlaylistContainer
+                    files={FilesStore.files}
+                    fetchFiles={this.fetchFiles}
+                    playFile={this.playFile}
+                  />
+                </div>
+              </Fragment>
             ) : (
               <Spin />
             )}

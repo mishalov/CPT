@@ -4,6 +4,8 @@ import { IDropboxFile } from "../playlist/IDropboxFile";
 import { FileSet } from "../playlist/FileSet";
 import { File } from "../playlist/File";
 import { Audio } from "../playlist/Audio";
+import { AudioPlaying } from "../AudioPlaying";
+import { duration } from "moment";
 
 const normalize = function(dropBox: IDropboxFile[]): FileSet {
   const fileSet: FileSet = new FileSet();
@@ -88,6 +90,19 @@ export class DropboxClient implements ICloudClient {
     if (!files) throw new Error("Не удалось получить список файлов!");
     const normalized: FileSet = normalize(files.entries as IDropboxFile[]);
     return normalized;
+  };
+
+  playFile = async (path: string) => {
+    const file = await this.client.filesGetTemporaryLink({ path });
+    const { metadata } = file;
+    const audio = new Audio(
+      metadata.name,
+      "Альб. не доступ. в Dropbox",
+      "Автор не доступ. в Dropbox",
+      -1,
+      file.metadata.path_lower || ""
+    );
+    return new AudioPlaying(audio, metadata.path_lower || "", file.link);
   };
 
   authorize = () => {};

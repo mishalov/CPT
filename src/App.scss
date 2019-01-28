@@ -1,0 +1,41 @@
+.App {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  background-color: rgb(237, 238, 240);
+}
+
+.main-container {
+  width: calc(100% - 18px);
+  max-width: 816px;
+  padding-right: 8px;
+  overflow-y: scroll;
+}
+
+@media only screen and (min-width: 480px) {
+  .main-container::-webkit-scrollbar-track {
+    /* -webkit-box-shadow: inset 0 0 6px rgb(217, 217, 217); */
+    /* border-radius: 10px; */
+    background-color: transparent;
+  }
+
+  .main-container::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+    opacity: 0;
+  }
+
+  .main-container::-webkit-scrollbar-thumb {
+    /* border-radius: 10px; */
+    /* -webkit-box-shadow: inset 0 0 6px rgb(217, 217, 217); */
+    background-color: rgba(0, 136, 204, 0.8);
+    border-radius: 4px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .main-container {
+    width: 100%;
+    padding: 0px;
+  }
+}

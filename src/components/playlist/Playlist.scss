@@ -1,14 +1,20 @@
+.playlist {
+}
+
 .audio-item {
   height: 48px;
   padding: 8px 8px;
   margin: 4px 0px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
     cursor: pointer;
   }
   &__play {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     margin-right: 24px;
   }
   &__info {
@@ -23,16 +29,56 @@
     opacity: 0.7;
     margin-bottom: 0px;
   }
+  &__art {
+    background-image: url("../../imgs/audio_row_placeholder.png");
+    background-size: contain;
+    background-position: center center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
 }
 
 .folder-item {
+  margin: 4px 0px;
+
   .ant-collapse-content-box {
     padding: 8px;
   }
   .ant-collapse-header {
     display: flex;
     padding: 0px;
-    justify-items: center;
+    align-items: center;
     height: 48px;
+    padding-right: 40px !important;
+
+    .arrow {
+      position: static !important;
+      order: 2;
+      transform: translateY(0%) !important;
+      line-height: normal !important;
+    }
+  }
+  &__header {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  &__title {
+    // line-height: 28px;
+  }
+
+  &__icon {
+    font-size: 24px;
+    color: #08c;
+    display: block;
+    margin-right: 12px;
+  }
+
+  @media only screen and (max-width: 480px) {
+    &__icon {
+      display: none;
+    }
   }
 }

@@ -1,9 +1,11 @@
+import { observable } from "mobx";
+
 export class Audio {
   public title: string;
   public album: string;
   public author: string;
   public fullPath: string;
-  public duration: number;
+  @observable public duration: number;
   constructor(
     title: string,
     album: string,

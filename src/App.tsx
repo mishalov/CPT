@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import logo from "./logo.svg";
-import "./App.css";
+import "./App.scss";
 import "antd/dist/antd.css";
 import "./style.scss";
 import Container from "./components/Container";
@@ -10,7 +10,9 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <Container />
+        <div className="App">
+          <Container />
+        </div>
       </Router>
     );
   }
