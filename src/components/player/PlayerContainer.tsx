@@ -1,11 +1,12 @@
 import React, { ReactNode } from "react";
-import { Icon, Slider, Button } from "antd";
+import { Icon, Slider, Button, Popover, Radio } from "antd";
 import "./Player.scss";
 import { observer, inject } from "mobx-react";
 import ReactPlayer, { ReactPlayerProps } from "react-player";
 import { Store } from "../../store/Store";
 import { secsToMins } from "../../helpers/secsToMins";
 import { SliderValue } from "antd/lib/slider";
+import RadioGroup from "antd/lib/radio/group";
 
 interface IPlayerContainer {
   store?: Store;
@@ -28,14 +29,54 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
       loaded: 0,
       loadedSeconds: 0
     },
+    repeat: {
+      value: "",
+      title: ""
+    },
+    shuffle: {
+      value: "",
+      title: ""
+    },
     volume: 0.5,
     playback: 0
   };
   private player!: ReactPlayer;
 
   handleChangeVolume = (volume: SliderValue) => {
-    this.setState({ volume: Number(volume) / 100 });
+    this.setState({ volume: Number(volume) });
   };
+
+  handleChangeMode = (mode: string) => {
+    let repeat = { title: "", value: "" };
+    let shuffle = { title: "", value: "" };
+    switch (((this.state as any)[mode] as any).value) {
+      case "": {
+        this.setState({
+          repeat,
+          shuffle,
+          [mode]: { title: "альбом", value: "album" }
+        });
+        break;
+      }
+      case "album": {
+        this.setState({
+          repeat,
+          shuffle,
+          [mode]: { title: "песня", value: "song" }
+        });
+        break;
+      }
+      case "song": {
+        this.setState({ repeat, shuffle, [mode]: { value: "", title: "" } });
+        break;
+      }
+      default: {
+        this.setState({ repeat, shuffle, [mode]: { value: "", title: "" } });
+        break;
+      }
+    }
+  };
+
   public render() {
     const { FilesStore } = this.props.store!;
     return (
@@ -57,7 +98,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           fileConfig={{ forceAudio: true }}
           url={FilesStore.playNow.URL}
           playing={FilesStore.isPlay}
-          volume={this.state.volume}
+          volume={this.state.volume / 100}
         />
 
         <Icon
@@ -106,12 +147,32 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
         <Slider
           className="player__volume"
           max={100}
-          value={this.state.volume * 100}
+          value={this.state.volume}
           onChange={this.handleChangeVolume}
         />
         <div className="player__additional">
-          <Icon className="player-btn__repeat" type="swap" />
-          <div className="player-btn__shufle" />
+          <div className="shuffle-group">
+            <Icon
+              className={`player-btn__shuffle ${this.state.shuffle.value &&
+                "active"}`}
+              type="swap"
+              onClick={() => {
+                this.handleChangeMode("shuffle");
+              }}
+            />
+            <p className="repeat-group__label">{this.state.shuffle.title}</p>
+          </div>
+          <div className="repeat-group">
+            <Icon
+              className={`player-btn__repeat ${this.state.repeat.value &&
+                "active"}`}
+              type="reload"
+              onClick={() => {
+                this.handleChangeMode("repeat");
+              }}
+            />
+            <p className="repeat-group__label">{this.state.repeat.title}</p>
+          </div>
         </div>
       </div>
     );

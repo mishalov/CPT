@@ -24,12 +24,16 @@ interface IContainer extends RouteComponentProps {
 @observer
 class Container extends React.Component<IContainer> {
   async componentDidMount() {
+    console.log("маунтнулось");
     const { props } = this;
     const { AuthStore, FilesStore } = this.props.store!;
-    if (!AuthStore.OAuthPassed && !props.location.hash) {
-      props.history.push("/auth");
-    } else {
-      props.history.push("/");
+    console.log("AuthStore: ", AuthStore);
+    if (!props.location.hash && props.location.pathname !== "/auth") {
+      if (!AuthStore.OAuthPassed) {
+        props.history.push("/auth");
+      } else {
+        props.history.push("/");
+      }
     }
   }
 
@@ -45,10 +49,11 @@ class Container extends React.Component<IContainer> {
 
   public render() {
     const { FilesStore, AuthStore } = this.props.store!;
+    console.log("FilesStore: ", FilesStore);
     return (
       <div className={"main-container"}>
         <Switch>
-          <Route path="/auth" exec={true}>
+          <Route path="/auth">
             <Authentication />
           </Route>
 

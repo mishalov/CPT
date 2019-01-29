@@ -6,6 +6,7 @@ import { File } from "../playlist/File";
 import { Audio } from "../playlist/Audio";
 import { AudioPlaying } from "../AudioPlaying";
 import { duration } from "moment";
+import { Client } from "@microsoft/microsoft-graph-client";
 
 const normalize = function(dropBox: IDropboxFile[]): FileSet {
   const fileSet: FileSet = new FileSet();
@@ -75,38 +76,38 @@ const normalize = function(dropBox: IDropboxFile[]): FileSet {
   return fileSet;
 };
 
-export class DropboxClient implements ICloudClient {
-  client: Dropbox;
-  public readonly cloudSource = "DropBox";
-  constructor(client: Dropbox) {
+export class OneDriveClient implements ICloudClient {
+  client: Client;
+  public readonly cloudSource = "OneDrive";
+  constructor(client: Client) {
     this.client = client;
   }
 
   getAllFiles = async () => {
-    const files = await this.client.filesListFolder({
-      recursive: true,
-      path: ""
-    });
-    if (!files) throw new Error("Не удалось получить список файлов!");
-    const normalized: FileSet = normalize(files.entries as IDropboxFile[]);
-    return normalized;
+    const disc = await this.client.api("/me/drive/root:/music").get();
+    console.log("disc: ", disc);
+    return await new FileSet();
   };
 
   playFile = async (path: string) => {
-    const pathArr = path.split("/");
-    const pseudoMeta = pathArr[pathArr.length - 2];
+    // const pathArr = path.split("/");
+    // const pseudoMeta = pathArr[pathArr.length - 2];
 
-    const file = await this.client.filesGetTemporaryLink({ path });
-    const { metadata } = file;
-    const audio = new Audio(
-      metadata.name,
-      pseudoMeta,
-      pseudoMeta,
-      0,
-      file.metadata.path_lower || ""
+    // const file = await this.client.filesGetTemporaryLink({ path });
+    // const { metadata } = file;
+    // const audio = new Audio(
+    //   metadata.name,
+    //   pseudoMeta,
+    //   pseudoMeta,
+    //   0,
+    //   file.metadata.path_lower || ""
+    // );
+
+    return new AudioPlaying(
+      new Audio("sdf", "asdfas", "dsfaas", 34, "23fa"),
+      "asdfasd",
+      "asdfas"
     );
-
-    return new AudioPlaying(audio, metadata.path_lower || "", file.link);
   };
 
   authorize = () => {};

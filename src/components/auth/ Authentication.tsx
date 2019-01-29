@@ -4,11 +4,15 @@ import { Dropbox } from "dropbox";
 import { withRouter, RouteComponentProps } from "react-router";
 import { Card, Button, Icon } from "antd";
 import * as Msal from "msal";
+import * as MicrosoftGraph from "@microsoft/microsoft-graph-client";
 import "./Authentication.scss";
 import { inject, IStoresToProps, observer } from "mobx-react";
 import { Store } from "../../store/Store";
 import { FilesStore } from "../../store/FilesStore";
 import { DropboxClient } from "../../types/clients/DropboxClient";
+import { AuthProviderCallback } from "@microsoft/microsoft-graph-client";
+import { OneDriveClient } from "../../types/clients/OneDriveClient";
+import { AuthStore } from "../../store/AuthStore";
 
 interface IAuthentication extends RouteComponentProps {
   store?: Store;
@@ -27,17 +31,16 @@ class Authentication extends React.Component<IAuthentication> {
     if (url) {
       this.setState({ OAuthUrl: url });
     }
-    console.log("Квери стринг", queryString.parse(this.props.location.hash));
 
     const oldToken = localStorage.getItem("access_token");
-    if (oldToken) {
+    const cloudSource = localStorage.getItem("cloudSource");
+    if (oldToken && cloudSource === "Dropbox") {
       AuthStore.setLoading(true);
       dropBox.setAccessToken(oldToken);
 
       dropBox
         .usersGetCurrentAccount()
         .then(result => {
-          console.log("result: ", result);
           AuthStore.setLoading(false);
           AuthStore.setIsAuthed();
           FilesStore.setClient(new DropboxClient(dropBox));
@@ -45,6 +48,42 @@ class Authentication extends React.Component<IAuthentication> {
         })
         .catch(err => {
           AuthStore.setLoading(false);
+        });
+    }
+
+    // если есть Access_token то входим
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      FilesStore.setClient(
+        new OneDriveClient(
+          MicrosoftGraph.Client.init({
+            authProvider: (done: AuthProviderCallback) => {
+              done(null, accessToken);
+            }
+          })
+        )
+      );
+      AuthStore.setIsAuthed();
+      console.log("хэш", this.props.location.hash);
+      this.props.history.push("/");
+    }
+
+    //* Получаем Access_token для OneDrive по id_token
+    const userAgentApplication = new Msal.UserAgentApplication(
+      "b07f11e5-8934-40a1-a327-1859322ed1c6",
+      null,
+      () => {}
+    );
+
+    const idToken = localStorage.getItem("id_token");
+    if (idToken) {
+      userAgentApplication
+        .acquireTokenSilent(["files.read"])
+        .then(async accessToken => {
+          localStorage.setItem("access_token", accessToken);
+        })
+        .catch(err => {
+          console.error("Ошибка получения access_token Onedrive", err);
         });
     }
 
@@ -62,7 +101,6 @@ class Authentication extends React.Component<IAuthentication> {
 
   authorizedByDropbox = async (urlParams: any) => {
     const FilesStore: FilesStore = (this.props.store as any).FilesStore;
-    const AuthStore: FilesStore = (this.props.store as any).FilesStore;
     localStorage.setItem("access_token", urlParams.access_token);
     FilesStore.setClient(
       new DropboxClient(
@@ -73,7 +111,18 @@ class Authentication extends React.Component<IAuthentication> {
     );
   };
 
-  authorizedByOneDrive = (urlParams: any) => {};
+  authorizedByOneDrive = async (urlParams: any) => {
+    const FilesStore: FilesStore = (this.props.store as any).FilesStore;
+    const AuthStore: AuthStore = (this.props.store as any).AuthStore;
+    const accessToken =
+      localStorage.getItem("access_token") || urlParams.access_token;
+    if (accessToken) {
+      localStorage.setItem("access_token", accessToken);
+    }
+    if (urlParams.id_token) {
+      localStorage.setItem("id_token", urlParams.id_token);
+    }
+  };
 
   handleOnedriveAuth = () => {
     localStorage.setItem("cloudSource", "OneDrive");
@@ -82,7 +131,7 @@ class Authentication extends React.Component<IAuthentication> {
       null,
       () => {}
     );
-    userAgentApplication.loginRedirect();
+    userAgentApplication.loginRedirect(["files.read"]);
   };
 
   public render() {
