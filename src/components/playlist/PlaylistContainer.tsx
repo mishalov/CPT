@@ -15,7 +15,7 @@ interface IPlayListContainer {
   files: FileSet;
   fetchFiles: () => void;
   playFile: (path: string) => void;
-  playNow: AudioPlaying;
+  playNow?: AudioPlaying;
 }
 
 let pseudoUid = 0;
@@ -46,8 +46,7 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
       const audio = f.content as Audio;
       return (
         <div
-          className={`audio-item ${audio.fullPath ===
-            this.props.playNow.fullPath && "now"} `}
+          className={`audio-item`}
           key={key()}
           onClick={() => this.props.playFile(audio.fullPath)}
         >

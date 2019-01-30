@@ -64,7 +64,6 @@ class Container extends React.Component<IContainer> {
                 <div style={{ marginTop: "12px" }}>
                   <PlaylistContainer
                     files={FilesStore.files}
-                    playNow={FilesStore.playNow}
                     fetchFiles={this.fetchFiles}
                     playFile={this.playFile}
                   />
