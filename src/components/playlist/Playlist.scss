@@ -8,6 +8,10 @@
   border-radius: 5px;
   display: flex;
   align-items: center;
+
+  &.now {
+    background-color: rgba(0, 0, 0, 0.15);
+  }
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
     cursor: pointer;

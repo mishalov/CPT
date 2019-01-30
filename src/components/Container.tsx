@@ -15,6 +15,7 @@ import { Store } from "../store/Store";
 import { Spin } from "antd";
 import PlayerContainer from "./player/PlayerContainer";
 import { isMobile } from "react-device-detect";
+import TopBar from "./topBar/TopBar";
 
 interface IContainer extends RouteComponentProps {
   store?: Store;
@@ -24,11 +25,9 @@ interface IContainer extends RouteComponentProps {
 @observer
 class Container extends React.Component<IContainer> {
   async componentDidMount() {
-    console.log("маунтнулось");
     const { props } = this;
     const { AuthStore, FilesStore } = this.props.store!;
-    console.log("AuthStore: ", AuthStore);
-    if (!props.location.hash && props.location.pathname !== "/auth") {
+    if (!props.location.hash) {
       if (!AuthStore.OAuthPassed) {
         props.history.push("/auth");
       } else {
@@ -49,7 +48,6 @@ class Container extends React.Component<IContainer> {
 
   public render() {
     const { FilesStore, AuthStore } = this.props.store!;
-    console.log("FilesStore: ", FilesStore);
     return (
       <div className={"main-container"}>
         <Switch>
@@ -60,11 +58,13 @@ class Container extends React.Component<IContainer> {
           <Route path="/">
             {AuthStore.OAuthPassed ? (
               <Fragment>
+                <TopBar />
                 <PlayerContainer />
 
                 <div style={{ marginTop: "12px" }}>
                   <PlaylistContainer
                     files={FilesStore.files}
+                    playNow={FilesStore.playNow}
                     fetchFiles={this.fetchFiles}
                     playFile={this.playFile}
                   />

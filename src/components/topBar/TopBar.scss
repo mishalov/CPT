@@ -1,0 +1,17 @@
+.top-bar {
+  display: flex;
+  margin: 8px 0px;
+  flex-direction: row-reverse;
+  p {
+    margin: 0px 8px;
+  }
+  &__user-icon {
+    display: flex;
+    align-items: center;
+
+    i:hover {
+      color: #08c;
+      cursor: pointer;
+    }
+  }
+}

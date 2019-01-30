@@ -16,6 +16,7 @@
     "axios": "^0.18.0",
     "dropbox": "^4.0.15",
     "isomorphic-fetch": "^2.2.1",
+    "jsmediatags": "^3.8.1",
     "mobx": "^5.9.0",
     "mobx-react": "^5.4.3",
     "msal": "^0.2.4",

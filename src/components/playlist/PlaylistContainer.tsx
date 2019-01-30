@@ -9,11 +9,13 @@ import { observer, inject } from "mobx-react";
 import { FileSet } from "../../types/playlist/FileSet";
 import { Audio } from "../../types/playlist/Audio";
 import { Z_BLOCK } from "zlib";
+import { AudioPlaying } from "../../types/AudioPlaying";
 
 interface IPlayListContainer {
   files: FileSet;
   fetchFiles: () => void;
   playFile: (path: string) => void;
+  playNow: AudioPlaying;
 }
 
 let pseudoUid = 0;
@@ -30,28 +32,13 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
     playlist: []
   };
 
-  mapPlaylist = (files: IDropboxFile[]) => {
-    const playlist: IPlaylistItem[] = files.map(el => ({
-      title: el.name,
-      bandName: "Альбомы пока не поддерживаются",
-      duration: 100,
-      isFolder: false
-    }));
-    console.log("playlist: ", playlist);
-    return playlist;
-  };
-
   componentDidMount() {
     this.props.fetchFiles();
   }
 
-  componentDidUpdate(prevProps: any, prevState: any) {
-    const { files } = this.props;
-    console.log("files: ", files);
-  }
-
   makeList(fs: FileSet) {
-    return fs.files.map(el => this.makeItem(el));
+    if (fs.files && fs.files.length > 0)
+      return fs.files.map(el => this.makeItem(el));
   }
 
   makeItem(f: File) {
@@ -59,7 +46,8 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
       const audio = f.content as Audio;
       return (
         <div
-          className="audio-item"
+          className={`audio-item ${audio.fullPath ===
+            this.props.playNow.fullPath && "now"} `}
           key={key()}
           onClick={() => this.props.playFile(audio.fullPath)}
         >
@@ -72,31 +60,33 @@ class PlaylistContainer extends React.Component<IPlayListContainer> {
       );
     } else {
       const folder = f.content as FileSet;
-      return (
-        <Row
-          type="flex"
-          justify="center"
-          align="middle"
-          key={key()}
-          className="folder-item"
-        >
-          <Col span={24}>
-            <Collapse>
-              <Panel
-                header={
-                  <div className="folder-item__header">
-                    <Icon className="folder-item__icon" type="folder" />
-                    <div className="folder-item__title">{f.title}</div>
-                  </div>
-                }
-                key="1"
-              >
-                {this.makeList(folder)}
-              </Panel>
-            </Collapse>
-          </Col>
-        </Row>
-      );
+      const content = this.makeList(folder);
+      if (content && content!.filter(el => el).length > 0)
+        return (
+          <Row
+            type="flex"
+            justify="center"
+            align="middle"
+            key={key()}
+            className="folder-item"
+          >
+            <Col span={24}>
+              <Collapse>
+                <Panel
+                  header={
+                    <div className="folder-item__header">
+                      <Icon className="folder-item__icon" type="folder" />
+                      <div className="folder-item__title">{f.title}</div>
+                    </div>
+                  }
+                  key="1"
+                >
+                  {content}
+                </Panel>
+              </Collapse>
+            </Col>
+          </Row>
+        );
     }
   }
 

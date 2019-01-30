@@ -66,9 +66,14 @@
       color: rgb(2, 107, 160);
     }
     &__step {
-      font-size: 20px;
       color: #08c;
+      font-size: 20px;
+      cursor: pointer;
       opacity: 0.8;
+    }
+    &__step:hover {
+      color: rgb(2, 107, 160);
+      opacity: 1;
     }
   }
 }

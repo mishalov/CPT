@@ -37,7 +37,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
       value: "",
       title: ""
     },
-    volume: 0.5,
+    volume: 50,
     playback: 0
   };
   private player!: ReactPlayer;
@@ -99,6 +99,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           url={FilesStore.playNow.URL}
           playing={FilesStore.isPlay}
           volume={this.state.volume / 100}
+          onEnded={FilesStore.getNext}
         />
 
         <Icon
@@ -106,7 +107,6 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           theme="filled"
           className="player-btn__play"
           onClick={() => {
-            console.log(FilesStore.isPlay);
             FilesStore.switchPlay();
           }}
         />
@@ -115,8 +115,14 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           type="step-backward"
           theme="filled"
           className="player-btn__step"
+          onClick={FilesStore.getPrev}
         />
-        <Icon type="step-forward" theme="filled" className="player-btn__step" />
+        <Icon
+          type="step-forward"
+          theme="filled"
+          className="player-btn__step"
+          onClick={FilesStore.getNext}
+        />
         <div className="slider-block">
           <div className="slider-block__meta">
             <div className="slider-block__naming">

@@ -4,6 +4,7 @@ import { ICloudClient } from "../types/clients/ICloudClient";
 import { async } from "q";
 import { AudioPlaying } from "../types/AudioPlaying";
 import { Audio } from "../types/playlist/Audio";
+import { checkIfStateModificationsAreAllowed } from "mobx/lib/internal";
 
 export class FilesStore {
   @observable files!: FileSet;
@@ -41,6 +42,19 @@ export class FilesStore {
   };
   @action.bound switchPlay = () => {
     this.isPlay = !this.isPlay;
+  };
+  @action.bound getNext = () => {
+    this.client.getNext(this.playNow.fullPath).then(file => {
+      this.isPlay = true;
+      this.playNow = file;
+    });
+  };
+
+  @action.bound getPrev = () => {
+    this.client.getPrev(this.playNow.fullPath).then(file => {
+      this.isPlay = true;
+      this.playNow = file;
+    });
   };
 }
 

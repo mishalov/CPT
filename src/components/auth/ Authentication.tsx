@@ -53,7 +53,7 @@ class Authentication extends React.Component<IAuthentication> {
 
     // если есть Access_token то входим
     const accessToken = localStorage.getItem("access_token");
-    if (accessToken) {
+    if (accessToken && cloudSource === "OneDrive") {
       FilesStore.setClient(
         new OneDriveClient(
           MicrosoftGraph.Client.init({
@@ -64,7 +64,7 @@ class Authentication extends React.Component<IAuthentication> {
         )
       );
       AuthStore.setIsAuthed();
-      console.log("хэш", this.props.location.hash);
+
       this.props.history.push("/");
     }
 
@@ -76,11 +76,23 @@ class Authentication extends React.Component<IAuthentication> {
     );
 
     const idToken = localStorage.getItem("id_token");
-    if (idToken) {
+    if (idToken && !(accessToken && cloudSource === "OneDrive")) {
       userAgentApplication
-        .acquireTokenSilent(["files.read"])
+        .acquireTokenSilent(["files.read.all"])
         .then(async accessToken => {
           localStorage.setItem("access_token", accessToken);
+          FilesStore.setClient(
+            new OneDriveClient(
+              MicrosoftGraph.Client.init({
+                authProvider: (done: AuthProviderCallback) => {
+                  done(null, accessToken);
+                }
+              })
+            )
+          );
+          AuthStore.setIsAuthed();
+
+          this.props.history.push("/");
         })
         .catch(err => {
           console.error("Ошибка получения access_token Onedrive", err);
@@ -131,7 +143,7 @@ class Authentication extends React.Component<IAuthentication> {
       null,
       () => {}
     );
-    userAgentApplication.loginRedirect(["files.read"]);
+    userAgentApplication.loginRedirect(["files.read.all"]);
   };
 
   public render() {
@@ -144,8 +156,12 @@ class Authentication extends React.Component<IAuthentication> {
           loading={AuthStore.loading}
         >
           <p>
-            Здравствуйте! Для получения доступа к Вашему Dropbox нам необходима
-            авторизация. Нажмите пожалуйста на кнопку ниже.
+            Здравствуйте! Для получения доступа к Вашему облаку нам необходима
+            авторизация. Нажмите пожалуйста на кнопку ниже.{" "}
+          </p>
+          <p>
+            Мы рекомендуем ипользовать <b>OneDrive</b> т.к он предоставляет
+            метаинформацию по файлам (альбом, композитор, обложка и т.д)
           </p>
           <Button
             className="auth-container__button"
