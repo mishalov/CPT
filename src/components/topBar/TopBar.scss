@@ -1,11 +1,24 @@
 .top-bar {
   display: flex;
+  justify-content: space-between;
   margin: 8px 0px;
-  flex-direction: row-reverse;
   p {
     margin: 0px 8px;
   }
+  &__switch-dest {
+    margin-left: 4px;
+
+    &_icon {
+      width: 12px;
+      height: 20px;
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-image: url("../../imgs/album.png");
+    }
+  }
   &__user-icon {
+    margin-right: 4px;
     display: flex;
     align-items: center;
 

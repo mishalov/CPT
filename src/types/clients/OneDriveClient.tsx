@@ -10,6 +10,8 @@ import { Client } from "@microsoft/microsoft-graph-client";
 import * as MicrosoftGraph from "@microsoft/microsoft-graph-types";
 import { normalize } from "path";
 import { User } from "../playlist/User";
+import { async } from "q";
+import { groupBy } from "../../helpers/groupBy";
 
 export class OneDriveClient implements ICloudClient {
   client: Client;
@@ -66,12 +68,59 @@ export class OneDriveClient implements ICloudClient {
     return fileSet;
   };
 
+  normalizeAlbums = async (): Promise<FileSet> => {
+    const authors: File[] = [];
+    this.mapOfFiles.forEach(song => {
+      const audio = song.content as Audio;
+      if (!authors.find(el => el.title === audio.author)) {
+        authors.push(new File(audio.author, "Folder", new FileSet()));
+      }
+    });
+
+    authors.forEach(author => {
+      const albums = new FileSet();
+      this.mapOfFiles.forEach(song => {
+        const audio = song.content as Audio;
+        if (
+          !albums.files.find(el => el.title === audio.album) &&
+          audio.author === author.title
+        ) {
+          albums.files.push(new File(audio.album, "Folder", new FileSet()));
+        }
+      });
+      author.content = albums;
+    });
+
+    this.mapOfFiles.forEach(song => {
+      const audio = song.content as Audio;
+      const authorFolder = authors.find(el => el.title === audio.author);
+      if (!authorFolder) {
+        authors.push(song);
+      } else {
+        const albumFolder = authorFolder.content as FileSet;
+        const songsFolder = albumFolder.files.find(
+          el => el.title !== audio.album
+        );
+        if (!songsFolder) {
+          (authorFolder.content as FileSet).files.push(song);
+        } else {
+          (songsFolder.content as FileSet).files.push(song);
+        }
+      }
+    });
+
+    const fileSet = new FileSet();
+    fileSet.files = authors;
+    return fileSet;
+  };
+
   getAllFiles = async () => {
     const folder: MicrosoftGraph.DriveItem = await this.client
       .api("/me/drive/root:/music")
       .expand("children")
       .get();
 
+    this.mapOfFiles = [];
     const fileSet = await this.normalize(folder);
     return await fileSet;
   };
@@ -114,5 +163,10 @@ export class OneDriveClient implements ICloudClient {
     return this.playFile(
       (this.mapOfFiles[nextIndex].content as Audio).fullPath
     );
+  };
+
+  getAllFilesAlbums = async () => {
+    const fileSet = await this.normalizeAlbums();
+    return await fileSet;
   };
 }

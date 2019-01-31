@@ -147,4 +147,8 @@ export class DropboxClient implements ICloudClient {
     const dbUser = await this.client.usersGetCurrentAccount();
     return new User(dbUser.name.display_name);
   };
+
+  getAllFilesAlbums = async () => {
+    return await this.getAllFiles();
+  };
 }

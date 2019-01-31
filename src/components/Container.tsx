@@ -66,6 +66,7 @@ class Container extends React.Component<IContainer> {
                     files={FilesStore.files}
                     fetchFiles={this.fetchFiles}
                     playFile={this.playFile}
+                    // playNow={FilesStore.playNow}
                   />
                 </div>
               </Fragment>

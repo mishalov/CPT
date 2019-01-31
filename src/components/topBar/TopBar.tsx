@@ -1,7 +1,7 @@
 import React from "react";
 import "./TopBar.scss";
 import { inject, observer } from "mobx-react";
-import { Icon, Tooltip } from "antd";
+import { Icon, Tooltip, Switch } from "antd";
 import { Store } from "../../store/Store";
 
 interface ITopBar {
@@ -22,10 +22,24 @@ class TopBar extends React.Component<ITopBar> {
     window.location.href = "/";
   };
 
+  handleChangeDest = (checked: boolean) => {
+    if (checked) this.props.store!.FilesStore.fetchFilesAlbum();
+    else {
+      this.props.store!.FilesStore.fetchFiles();
+    }
+  };
+
   public render() {
     const AuthStore = this.props.store!.AuthStore;
     return (
       <div className="top-bar">
+        <div className="top-bar__switch-dest">
+          <Switch
+            onChange={this.handleChangeDest}
+            unCheckedChildren={<Icon type="folder" />}
+            checkedChildren={<div className="top-bar__switch-dest_icon" />}
+          />
+        </div>
         <div className="top-bar__user-icon">
           <p>{AuthStore.user!.userName}</p>
           <Tooltip title="Выход">

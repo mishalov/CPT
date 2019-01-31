@@ -4,7 +4,10 @@ import { ICloudClient } from "../types/clients/ICloudClient";
 import { async } from "q";
 import { AudioPlaying } from "../types/AudioPlaying";
 import { Audio } from "../types/playlist/Audio";
-import { checkIfStateModificationsAreAllowed } from "mobx/lib/internal";
+import {
+  checkIfStateModificationsAreAllowed,
+  computed
+} from "mobx/lib/internal";
 
 export class FilesStore {
   @observable files!: FileSet;
@@ -16,6 +19,7 @@ export class FilesStore {
     ""
   );
   @observable isPlay: boolean = false;
+
   @action.bound setCloud = (sourceCloud: "OneDrive" | "Dropbox" | "") => {
     this.sourceCloud = sourceCloud;
   };
@@ -25,6 +29,16 @@ export class FilesStore {
   @action.bound fetchFiles = async () => {
     this.files = await this.client.getAllFiles();
   };
+
+  @action.bound fetchFilesAlbum = async () => {
+    if (this.files) {
+      this.files = await this.client.getAllFilesAlbums();
+    } else {
+      await this.client.getAllFiles();
+      this.files = await this.client.getAllFilesAlbums();
+    }
+  };
+
   @action.bound playFile = async (path: string) => {
     this.client.playFile(path).then(result => {
       this.playNow = result;
