@@ -40,7 +40,6 @@ class PlaylistAudioItem extends React.Component<IPlaylistAudioItem> {
 class PlaylistAudioItemPure extends React.PureComponent<IPlaylistAudioPure> {
   public render() {
     const { key, isNow, audio, playFile } = this.props;
-    console.log(audio.fullPath);
     return (
       <div
         className={`audio-item ${isNow && "now"}`}

@@ -1,7 +1,6 @@
 import React from "react";
 import queryString from "query-string";
 import { Dropbox } from "dropbox";
-import { withRouter, RouteComponentProps } from "react-router";
 import { Card, Button, Icon } from "antd";
 import * as Msal from "msal";
 import * as MicrosoftGraph from "@microsoft/microsoft-graph-client";
@@ -14,7 +13,7 @@ import { AuthProviderCallback } from "@microsoft/microsoft-graph-client";
 import { OneDriveClient } from "../../types/clients/OneDriveClient";
 import { AuthStore } from "../../store/AuthStore";
 
-interface IAuthentication extends RouteComponentProps {
+interface IAuthentication {
   store?: Store;
 }
 
@@ -23,63 +22,74 @@ interface IAuthentication extends RouteComponentProps {
 class Authentication extends React.Component<IAuthentication> {
   state = { OAuthUrl: "" };
 
-  componentDidMount() {
-    // Получаем URL по которому будет авторизовавыться в случае Dropbox
+  /**
+   * Получаем URL Аутентификации DropBox.
+   * Если есть запомненный токен и запомнено, что входили через дропбокс - пытаемся аутентифицироваться
+   */
+  public tryDropboxRelog = async (dropBox: Dropbox) => {
     const { AuthStore, FilesStore } = this.props.store!;
-    const dropBox = new Dropbox({ clientId: "7174q8sh3aiss51" });
-    const url = dropBox.getAuthenticationUrl("http://localhost:3000/auth");
-    if (url) {
-      this.setState({ OAuthUrl: url });
-    }
-
     const oldToken = localStorage.getItem("access_token");
     const cloudSource = localStorage.getItem("cloudSource");
     if (oldToken && cloudSource === "Dropbox") {
       AuthStore.setLoading(true);
       dropBox.setAccessToken(oldToken);
-
-      dropBox
-        .usersGetCurrentAccount()
-        .then(result => {
-          AuthStore.setLoading(false);
-          AuthStore.setIsAuthed();
-          FilesStore.setClient(new DropboxClient(dropBox));
-          this.props.history.push("/");
-        })
-        .catch(err => {
-          AuthStore.setLoading(false);
-        });
+      try {
+        const currentAccount = await dropBox.usersGetCurrentAccount();
+        AuthStore.setLoading(false);
+        AuthStore.setIsAuthed();
+        FilesStore.setClient(new DropboxClient(dropBox));
+      } catch (e) {
+        AuthStore.setLoading(false);
+      }
     }
+  };
 
-    // если есть Access_token то входим
-    const accessToken = localStorage.getItem("access_token");
-    if (accessToken && cloudSource === "OneDrive") {
+  /**
+   * Попытка релогнуться в Onedrive
+   */
+  public tryOnedriveRelog = async () => {
+    const { AuthStore, FilesStore } = this.props.store!;
+    const oldToken = localStorage.getItem("access_token");
+    const cloudSource = localStorage.getItem("cloudSource");
+    /**
+     * oldToken - токен доступа OneDrive;
+     * Если он есть, и при этом последний сервис - onedrive
+     * То пытаемся логнуться через onedrive
+     */
+    if (oldToken && cloudSource === "OneDrive") {
       FilesStore.setClient(
         new OneDriveClient(
           MicrosoftGraph.Client.init({
             authProvider: (done: AuthProviderCallback) => {
-              done(null, accessToken);
+              done(null, oldToken);
             }
           })
         )
       );
       AuthStore.setIsAuthed();
-
-      this.props.history.push("/");
+      return;
     }
 
     //* Получаем Access_token для OneDrive по id_token
+
+    const idToken = localStorage.getItem("id_token");
+    if (idToken) {
+      this.getOnedriveAccessToken(idToken);
+    }
+  };
+
+  public getOnedriveAccessToken = async (idToken: string) => {
+    const store = this.props.store!;
+    const { FilesStore, AuthStore } = store;
     const userAgentApplication = new Msal.UserAgentApplication(
       "b07f11e5-8934-40a1-a327-1859322ed1c6",
       null,
       () => {}
     );
-
-    const idToken = localStorage.getItem("id_token");
-    if (idToken && !(accessToken && cloudSource === "OneDrive")) {
+    if (idToken) {
       userAgentApplication
         .acquireTokenSilent(["files.read.all"])
-        .then(async accessToken => {
+        .then(accessToken => {
           localStorage.setItem("access_token", accessToken);
           FilesStore.setClient(
             new OneDriveClient(
@@ -91,52 +101,44 @@ class Authentication extends React.Component<IAuthentication> {
             )
           );
           AuthStore.setIsAuthed();
-
-          this.props.history.push("/");
         })
         .catch(err => {
           console.error("Ошибка получения access_token Onedrive", err);
         });
     }
-
-    // Когда страничка OAUTH2 Dropbox или Onedrive редиректнула нас назад при авторизации
-    if (this.props.location.hash) {
-      const urlParams = queryString.parse(this.props.location.hash) as any;
-      switch (localStorage.getItem("cloudSource")) {
-        case "Dropbox":
-          this.authorizedByDropbox(urlParams);
-        case "OneDrive":
-          this.authorizedByOneDrive(urlParams);
-      }
-    }
-  }
-
-  authorizedByDropbox = async (urlParams: any) => {
-    const FilesStore: FilesStore = (this.props.store as any).FilesStore;
-    localStorage.setItem("access_token", urlParams.access_token);
-    FilesStore.setClient(
-      new DropboxClient(
-        new Dropbox({
-          accessToken: urlParams.access_token
-        })
-      )
-    );
   };
 
-  authorizedByOneDrive = async (urlParams: any) => {
-    const FilesStore: FilesStore = (this.props.store as any).FilesStore;
-    const AuthStore: AuthStore = (this.props.store as any).AuthStore;
+  /**
+   * Перехват после редиректа при авторизации через Дропбокс
+   */
+  public authorizedByDropbox = async (urlParams: any) => {
+    const store = this.props.store!;
+    const FilesStore: FilesStore = store.FilesStore;
+    const { AuthStore } = store;
+    localStorage.setItem("access_token", urlParams.access_token);
+    const dropbox = new Dropbox({
+      accessToken: urlParams.access_token
+    });
+    FilesStore.setClient(new DropboxClient(dropbox));
+    AuthStore.setIsAuthed();
+  };
+
+  /**
+   * Перехват после редиректа при авторизации через Onedrive
+   */
+  public authorizedByOneDrive = async (urlParams: any) => {
     const accessToken =
-      localStorage.getItem("access_token") || urlParams.access_token;
+      urlParams.access_token || localStorage.getItem("access_token");
     if (accessToken) {
       localStorage.setItem("access_token", accessToken);
     }
     if (urlParams.id_token) {
       localStorage.setItem("id_token", urlParams.id_token);
     }
+    await this.getOnedriveAccessToken(urlParams.id_token);
   };
 
-  handleOnedriveAuth = () => {
+  public handleOnedriveAuth = () => {
     localStorage.setItem("cloudSource", "OneDrive");
     const userAgentApplication = new Msal.UserAgentApplication(
       "b07f11e5-8934-40a1-a327-1859322ed1c6",
@@ -145,6 +147,37 @@ class Authentication extends React.Component<IAuthentication> {
     );
     userAgentApplication.loginRedirect(["files.read.all"]);
   };
+
+  /**
+   * Создаем инстансы SDK Dropbox и Onedrive
+   */
+  public componentDidMount() {
+    const dropBox = new Dropbox({ clientId: "7174q8sh3aiss51" });
+    const url = dropBox.getAuthenticationUrl("http://localhost:3000");
+    if (url) {
+      this.setState({ OAuthUrl: url });
+    }
+
+    // Когда страничка OAUTH2 Dropbox или Onedrive редиректнула нас назад при авторизации
+    if (location.hash) {
+      const urlParams = queryString.parse(location.hash) as any;
+      switch (localStorage.getItem("cloudSource")) {
+        case "Dropbox":
+          this.authorizedByDropbox(urlParams);
+        case "OneDrive":
+          this.authorizedByOneDrive(urlParams);
+      }
+    } else {
+      // Пытаемся релогнуться, вдруг входили раньше?
+      const cloudSource = localStorage.getItem("cloudSource");
+      if (cloudSource === "OneDrive") {
+        this.tryOnedriveRelog();
+      }
+      if (cloudSource === "Dropbox") {
+        this.tryDropboxRelog(dropBox);
+      }
+    }
+  }
 
   public render() {
     const { AuthStore } = this.props.store!;
@@ -188,4 +221,4 @@ class Authentication extends React.Component<IAuthentication> {
   }
 }
 
-export default inject("store")(withRouter(Authentication));
+export default Authentication;

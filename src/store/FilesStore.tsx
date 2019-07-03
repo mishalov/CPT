@@ -1,13 +1,8 @@
 import { observable, action } from "mobx";
 import { FileSet } from "../types/playlist/FileSet";
 import { ICloudClient } from "../types/clients/ICloudClient";
-import { async } from "q";
 import { AudioPlaying } from "../types/AudioPlaying";
 import { Audio } from "../types/playlist/Audio";
-import {
-  checkIfStateModificationsAreAllowed,
-  computed
-} from "mobx/lib/internal";
 
 export class FilesStore {
   @observable files!: FileSet;

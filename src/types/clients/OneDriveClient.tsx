@@ -140,6 +140,7 @@ export class OneDriveClient implements ICloudClient {
 
   getMe = async () => {
     const odUser: MicrosoftGraph.User = await this.client.api("/me").get();
+    console.log("odUser: ", odUser);
     return new User(
       odUser.displayName || (odUser.givenName + " " + odUser.surname)!
     );

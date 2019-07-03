@@ -5,8 +5,6 @@ import { FileSet } from "../playlist/FileSet";
 import { File } from "../playlist/File";
 import { Audio } from "../playlist/Audio";
 import { AudioPlaying } from "../AudioPlaying";
-import { duration } from "moment";
-import { async } from "q";
 import { User } from "../playlist/User";
 
 export class DropboxClient implements ICloudClient {

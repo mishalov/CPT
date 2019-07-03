@@ -1,13 +1,6 @@
 import React, { Fragment } from "react";
 // import fetch from "isomorphic-fetch";
 import { Dropbox } from "dropbox";
-import {
-  BrowserRouter as Router,
-  withRouter,
-  RouteComponentProps,
-  Switch,
-  Route
-} from "react-router-dom";
 import PlaylistContainer from "./playlist/PlaylistContainer";
 import Authentication from "./auth/ Authentication";
 import { inject, observer } from "mobx-react";
@@ -16,8 +9,9 @@ import { Spin } from "antd";
 import PlayerContainer from "./player/PlayerContainer";
 import { isMobile } from "react-device-detect";
 import TopBar from "./topBar/TopBar";
+import { findGetParameter } from "../helpers/findGetParameter";
 
-interface IContainer extends RouteComponentProps {
+interface IContainer {
   store?: Store;
 }
 
@@ -27,13 +21,12 @@ class Container extends React.Component<IContainer> {
   async componentDidMount() {
     const { props } = this;
     const { AuthStore, FilesStore } = this.props.store!;
-    if (!props.location.hash) {
-      if (!AuthStore.OAuthPassed) {
-        props.history.push("/auth");
-      } else {
-        props.history.push("/");
-      }
-    }
+    // if (!findGetParameter("hash")) {
+    //   if (!AuthStore.OAuthPassed) {
+    //     props.history.push("/auth");
+    //   } else {
+    //     props.history.push("/");
+    //   }
   }
 
   fetchFiles = () => {
@@ -46,38 +39,41 @@ class Container extends React.Component<IContainer> {
     FilesStore.playFile(path);
   };
 
-  public render() {
+  makeRoute = () => {
     const { FilesStore, AuthStore } = this.props.store!;
+    const { OAuthPassed, loading } = AuthStore;
+    console.log("OAuthPassed: ", OAuthPassed, loading);
+    if (loading) {
+      return <Spin />;
+    }
+    if (OAuthPassed) {
+      return (
+        <Fragment>
+          <TopBar />
+          <PlayerContainer />
+
+          <div style={{ marginTop: "12px" }}>
+            <PlaylistContainer
+              files={FilesStore.files}
+              fetchFiles={this.fetchFiles}
+              playFile={this.playFile}
+              // playNow={FilesStore.playNow}
+            />
+          </div>
+        </Fragment>
+      );
+    }
+    return <Authentication />;
+  };
+
+  public render() {
     return (
       <div className={"main-container"}>
-        <Switch>
-          <Route path="/auth">
-            <Authentication />
-          </Route>
-
-          <Route path="/">
-            {AuthStore.OAuthPassed ? (
-              <Fragment>
-                <TopBar />
-                <PlayerContainer />
-
-                <div style={{ marginTop: "12px" }}>
-                  <PlaylistContainer
-                    files={FilesStore.files}
-                    fetchFiles={this.fetchFiles}
-                    playFile={this.playFile}
-                    // playNow={FilesStore.playNow}
-                  />
-                </div>
-              </Fragment>
-            ) : (
-              <Spin />
-            )}
-          </Route>
-        </Switch>
+        {this.makeRoute()}
+        {/* <Authentication /> */}
       </div>
     );
   }
 }
 
-export default withRouter(Container);
+export default Container;
