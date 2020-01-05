@@ -11,8 +11,8 @@ interface ITopBar {
 @observer
 class TopBar extends React.Component<ITopBar> {
   async componentDidMount() {
-    const { FilesStore, AuthStore } = this.props.store!;
-    AuthStore.setUser(await FilesStore.client.getMe());
+    const { PlayerStore, AuthStore } = this.props.store!;
+    AuthStore.setUser(await PlayerStore.client.getMe());
   }
 
   handleLogOut = () => {
@@ -23,9 +23,9 @@ class TopBar extends React.Component<ITopBar> {
   };
 
   handleChangeDest = (checked: boolean) => {
-    if (checked) this.props.store!.FilesStore.fetchFilesAlbum();
+    if (checked) this.props.store!.PlayerStore.fetchFilesAlbum();
     else {
-      this.props.store!.FilesStore.fetchFiles();
+      this.props.store!.PlayerStore.fetchFiles();
     }
   };
 

@@ -7,7 +7,7 @@ import * as MicrosoftGraph from "@microsoft/microsoft-graph-client";
 import "./Authentication.scss";
 import { inject, IStoresToProps, observer } from "mobx-react";
 import { Store } from "../../store/Store";
-import { FilesStore } from "../../store/FilesStore";
+import { PlayerStore } from "../../store/PlayerStore";
 import { DropboxClient } from "../../types/clients/DropboxClient";
 import { AuthProviderCallback } from "@microsoft/microsoft-graph-client";
 import { OneDriveClient } from "../../types/clients/OneDriveClient";
@@ -27,7 +27,7 @@ class Authentication extends React.Component<IAuthentication> {
    * Если есть запомненный токен и запомнено, что входили через дропбокс - пытаемся аутентифицироваться
    */
   public tryDropboxRelog = async (dropBox: Dropbox) => {
-    const { AuthStore, FilesStore } = this.props.store!;
+    const { AuthStore, PlayerStore } = this.props.store!;
     const oldToken = localStorage.getItem("access_token");
     const cloudSource = localStorage.getItem("cloudSource");
     if (oldToken && cloudSource === "Dropbox") {
@@ -37,7 +37,7 @@ class Authentication extends React.Component<IAuthentication> {
         const currentAccount = await dropBox.usersGetCurrentAccount();
         AuthStore.setLoading(false);
         AuthStore.setIsAuthed();
-        FilesStore.setClient(new DropboxClient(dropBox));
+        PlayerStore.setClient(new DropboxClient(dropBox));
       } catch (e) {
         AuthStore.setLoading(false);
       }
@@ -48,7 +48,7 @@ class Authentication extends React.Component<IAuthentication> {
    * Попытка релогнуться в Onedrive
    */
   public tryOnedriveRelog = async () => {
-    const { AuthStore, FilesStore } = this.props.store!;
+    const { AuthStore, PlayerStore } = this.props.store!;
     const oldToken = localStorage.getItem("access_token");
     const cloudSource = localStorage.getItem("cloudSource");
     /**
@@ -57,7 +57,7 @@ class Authentication extends React.Component<IAuthentication> {
      * То пытаемся логнуться через onedrive
      */
     if (oldToken && cloudSource === "OneDrive") {
-      FilesStore.setClient(
+      PlayerStore.setClient(
         new OneDriveClient(
           MicrosoftGraph.Client.init({
             authProvider: (done: AuthProviderCallback) => {
@@ -80,7 +80,7 @@ class Authentication extends React.Component<IAuthentication> {
 
   public getOnedriveAccessToken = async (idToken: string) => {
     const store = this.props.store!;
-    const { FilesStore, AuthStore } = store;
+    const { PlayerStore, AuthStore } = store;
     const userAgentApplication = new Msal.UserAgentApplication(
       "b07f11e5-8934-40a1-a327-1859322ed1c6",
       null,
@@ -91,7 +91,7 @@ class Authentication extends React.Component<IAuthentication> {
         .acquireTokenSilent(["files.read.all"])
         .then(accessToken => {
           localStorage.setItem("access_token", accessToken);
-          FilesStore.setClient(
+          PlayerStore.setClient(
             new OneDriveClient(
               MicrosoftGraph.Client.init({
                 authProvider: (done: AuthProviderCallback) => {
@@ -113,13 +113,13 @@ class Authentication extends React.Component<IAuthentication> {
    */
   public authorizedByDropbox = async (urlParams: any) => {
     const store = this.props.store!;
-    const FilesStore: FilesStore = store.FilesStore;
+    const PlayerStore: PlayerStore = store.PlayerStore;
     const { AuthStore } = store;
     localStorage.setItem("access_token", urlParams.access_token);
     const dropbox = new Dropbox({
       accessToken: urlParams.access_token
     });
-    FilesStore.setClient(new DropboxClient(dropbox));
+    PlayerStore.setClient(new DropboxClient(dropbox));
     AuthStore.setIsAuthed();
   };
 

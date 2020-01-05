@@ -78,7 +78,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
   };
 
   public render() {
-    const { FilesStore } = this.props.store!;
+    const { PlayerStore } = this.props.store!;
     return (
       <div className="player" style={{ marginBottom: "12px" }}>
         <ReactPlayer
@@ -88,7 +88,7 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
             zIndex: -5
           }}
           onDuration={(dur: any) => {
-            FilesStore.playNow.audio.duration = dur;
+            PlayerStore.playNow.audio.duration = dur;
           }}
           onProgress={(progress: IDurationProgress) => {
             this.setState({ progress });
@@ -96,18 +96,18 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           width="1px"
           height="1px"
           fileConfig={{ forceAudio: true }}
-          url={FilesStore.playNow.URL}
-          playing={FilesStore.isPlay}
+          url={PlayerStore.playNow.URL}
+          playing={PlayerStore.isPlay}
           volume={this.state.volume / 100}
-          onEnded={FilesStore.getNext}
+          onEnded={PlayerStore.getNext}
         />
 
         <Icon
-          type={!FilesStore.isPlay ? "play-circle" : "pause-circle"}
+          type={!PlayerStore.isPlay ? "play-circle" : "pause-circle"}
           theme="filled"
           className="player-btn__play"
           onClick={() => {
-            FilesStore.switchPlay();
+            PlayerStore.switchPlay();
           }}
         />
 
@@ -115,34 +115,34 @@ class PlayerContainer extends React.Component<IPlayerContainer> {
           type="step-backward"
           theme="filled"
           className="player-btn__step"
-          onClick={FilesStore.getPrev}
+          onClick={PlayerStore.getPrev}
         />
         <Icon
           type="step-forward"
           theme="filled"
           className="player-btn__step"
-          onClick={FilesStore.getNext}
+          onClick={PlayerStore.getNext}
         />
         <div className="slider-block">
           <div className="slider-block__meta">
             <div className="slider-block__naming">
               <p className="slider-block__title">
-                {FilesStore.playNow.audio.title}
+                {PlayerStore.playNow.audio.title}
               </p>
               <p className="slider-block__author">
-                {FilesStore.playNow.audio.author}
+                {PlayerStore.playNow.audio.author}
               </p>
             </div>
             <p className="slider-block__time">
               <span>
                 {secsToMins(this.state.progress.playedSeconds)} /
-                {secsToMins(FilesStore.playNow.audio.duration)}
+                {secsToMins(PlayerStore.playNow.audio.duration)}
               </span>
             </p>
           </div>
           <Slider
             className="slider-block__slider"
-            max={FilesStore.playNow.audio.duration}
+            max={PlayerStore.playNow.audio.duration}
             tipFormatter={(val: number) => secsToMins(val)}
             onChange={(el: SliderValue) => {
               this.player.seekTo(Number(el));

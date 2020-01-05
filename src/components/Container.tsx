@@ -15,19 +15,18 @@ interface IContainer {
 @observer
 class Container extends React.Component<IContainer> {
   fetchFiles = () => {
-    const { FilesStore } = this.props.store!;
-    FilesStore.fetchFiles();
+    const { PlayerStore } = this.props.store!;
+    PlayerStore.fetchFiles();
   };
 
   playFile = (path: string) => {
-    const { FilesStore } = this.props.store!;
-    FilesStore.playFile(path);
+    const { PlayerStore } = this.props.store!;
+    PlayerStore.playFile(path);
   };
 
   makeRoute = () => {
-    const { FilesStore, AuthStore } = this.props.store!;
+    const { PlayerStore, AuthStore } = this.props.store!;
     const { OAuthPassed, loading } = AuthStore;
-    console.log("OAuthPassed: ", OAuthPassed, loading);
     if (loading) {
       return <Spin />;
     }
@@ -39,7 +38,7 @@ class Container extends React.Component<IContainer> {
 
           <div style={{ marginTop: "12px" }}>
             <PlaylistContainer
-              files={FilesStore.files}
+              files={PlayerStore.files}
               fetchFiles={this.fetchFiles}
               playFile={this.playFile}
             />

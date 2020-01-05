@@ -5,12 +5,10 @@ import { User } from "../playlist/User";
 
 export interface ICloudClient {
   cloudSource: string;
-  mapOfFiles: File[];
+  filesFlatList: () => File[];
   getAllFiles: () => Promise<FileSet>;
   getAllFilesAlbums: () => Promise<FileSet>;
   authorize: () => void;
   playFile: (path: string) => Promise<AudioPlaying>;
   getMe: () => Promise<User>;
-  getNext: (path: string) => Promise<AudioPlaying>;
-  getPrev: (path: string) => Promise<AudioPlaying>;
 }

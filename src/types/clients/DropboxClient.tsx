@@ -6,6 +6,7 @@ import { File } from "../playlist/File";
 import { Audio } from "../playlist/Audio";
 import { AudioPlaying } from "../AudioPlaying";
 import { User } from "../playlist/User";
+import filesetToFlat from "../../helpers/filesetToFlat";
 
 export class DropboxClient implements ICloudClient {
   client: Dropbox;
@@ -13,6 +14,10 @@ export class DropboxClient implements ICloudClient {
   public mapOfFiles: File[] = [];
   constructor(client: Dropbox) {
     this.client = client;
+  }
+
+  public filesFlatList(): File[] {
+    return this.mapOfFiles;
   }
 
   normalize = (dropBox: IDropboxFile[]): FileSet => {
@@ -78,7 +83,6 @@ export class DropboxClient implements ICloudClient {
           filePath
         )
       );
-      this.mapOfFiles.push(newAudio);
       pathArr.forEach((pathName: string, index: number) => {
         if (pathArr.length === 1 || pathArr.length - 1 === index) {
           if (!nodeNow.files) nodeNow.files = [newAudio];
@@ -100,6 +104,7 @@ export class DropboxClient implements ICloudClient {
     });
     if (!files) throw new Error("Не удалось получить список файлов!");
     const normalized: FileSet = this.normalize(files.entries as IDropboxFile[]);
+    this.mapOfFiles = filesetToFlat(normalized, []);
     return normalized;
   };
 
@@ -117,26 +122,6 @@ export class DropboxClient implements ICloudClient {
       file.metadata.path_lower || ""
     );
     return new AudioPlaying(audio, metadata.path_lower || "", file.link);
-  };
-
-  getNext = async (path: string) => {
-    let nextIndex = this.mapOfFiles.findIndex(
-      el => (el.content as Audio).fullPath === path
-    );
-    nextIndex = nextIndex === this.mapOfFiles.length - 1 ? 0 : nextIndex + 1;
-    return this.playFile(
-      (this.mapOfFiles[nextIndex].content as Audio).fullPath
-    );
-  };
-
-  getPrev = async (path: string) => {
-    let nextIndex = this.mapOfFiles.findIndex(
-      el => (el.content as Audio).fullPath === path
-    );
-    nextIndex = nextIndex === 0 ? 0 : nextIndex - 1;
-    return this.playFile(
-      (this.mapOfFiles[nextIndex].content as Audio).fullPath
-    );
   };
 
   authorize = () => {};

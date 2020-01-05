@@ -1,22 +1,21 @@
 import { ICloudClient } from "./ICloudClient";
-import { Dropbox } from "dropbox";
-import { IDropboxFile } from "../playlist/IDropboxFile";
 import { FileSet } from "../playlist/FileSet";
 import { File } from "../playlist/File";
 import { Audio } from "../playlist/Audio";
 import { AudioPlaying } from "../AudioPlaying";
-import { duration } from "moment";
 import { Client } from "@microsoft/microsoft-graph-client";
 import * as MicrosoftGraph from "@microsoft/microsoft-graph-types";
-import { normalize } from "path";
 import { User } from "../playlist/User";
-import { async } from "q";
-import { groupBy } from "../../helpers/groupBy";
+import filesetToFlat from "../../helpers/filesetToFlat";
 
 export class OneDriveClient implements ICloudClient {
   client: Client;
   public readonly cloudSource = "OneDrive";
-  mapOfFiles: File[] = [];
+  private mapOfFiles: File[] = [];
+
+  public filesFlatList(): File[] {
+    return this.mapOfFiles;
+  }
 
   constructor(client: Client) {
     this.client = client;
@@ -122,6 +121,7 @@ export class OneDriveClient implements ICloudClient {
 
     this.mapOfFiles = [];
     const fileSet = await this.normalize(folder);
+    this.mapOfFiles = filesetToFlat(fileSet, []);
     return await fileSet;
   };
 
@@ -140,29 +140,8 @@ export class OneDriveClient implements ICloudClient {
 
   getMe = async () => {
     const odUser: MicrosoftGraph.User = await this.client.api("/me").get();
-    console.log("odUser: ", odUser);
     return new User(
       odUser.displayName || (odUser.givenName + " " + odUser.surname)!
-    );
-  };
-
-  getNext = async (path: string) => {
-    let nextIndex = this.mapOfFiles.findIndex(
-      el => (el.content as Audio).fullPath === path
-    );
-    nextIndex = nextIndex === this.mapOfFiles.length - 1 ? 0 : nextIndex + 1;
-    return this.playFile(
-      (this.mapOfFiles[nextIndex].content as Audio).fullPath
-    );
-  };
-
-  getPrev = async (path: string) => {
-    let nextIndex = this.mapOfFiles.findIndex(
-      el => (el.content as Audio).fullPath === path
-    );
-    nextIndex = nextIndex === 0 ? 0 : nextIndex - 1;
-    return this.playFile(
-      (this.mapOfFiles[nextIndex].content as Audio).fullPath
     );
   };
 

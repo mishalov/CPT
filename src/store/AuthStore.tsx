@@ -8,19 +8,19 @@ export class AuthStore {
   @observable loading = false;
   @observable user?: User = new User("");
 
-  @action.bound setIsAuthed = () => {
+  @action setIsAuthed = () => {
     this.OAuthPassed = true;
   };
 
-  @action.bound setNotAuthed = () => {
+  @action setNotAuthed = () => {
     this.OAuthPassed = false;
   };
 
-  @action.bound setLoading = (loading: boolean) => {
+  @action setLoading = (loading: boolean) => {
     this.loading = loading;
   };
 
-  @action.bound setUser = (user: User) => {
+  @action setUser = (user: User) => {
     this.user = user;
   };
 }

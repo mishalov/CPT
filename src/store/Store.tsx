@@ -1,11 +1,11 @@
 import AuthStore from "./AuthStore";
 import CommonStore from "./CommonStore";
-import FilesStore from "./FilesStore";
+import PlayerStore from "./PlayerStore";
 
 export class Store {
   public AuthStore = AuthStore;
   public CommonStore = CommonStore;
-  public FilesStore = FilesStore;
+  public PlayerStore = PlayerStore;
 }
 
 export default new Store();

@@ -29,8 +29,8 @@ class PlaylistAudioItem extends React.Component<IPlaylistAudioItem> {
         audio={audio}
         playFile={playFile}
         isNow={
-          store!.FilesStore.playNow &&
-          store!.FilesStore.playNow.fullPath === audio.fullPath
+          store!.PlayerStore.playNow &&
+          store!.PlayerStore.playNow.fullPath === audio.fullPath
         }
       />
     );
