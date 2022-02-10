@@ -20,7 +20,7 @@
     "mobx": "^5.9.0",
     "mobx-react": "^5.4.3",
     "msal": "^0.2.4",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "query-string": "^6.2.0",
     "react": "^16.7.0",
     "react-device-detect": "^1.6.2",
